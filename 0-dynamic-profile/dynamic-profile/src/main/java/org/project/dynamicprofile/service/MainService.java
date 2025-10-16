@@ -36,7 +36,7 @@ public class MainService {
         log.info("querying API for new cat fact");
         ResponseEntity<CatFact> catFact = restTemplate.getForEntity(catFactAPI, CatFact.class);
 
-        Me me = Me.organize(name, email, stack);
+        Me me = Me.organize(email, name, stack);
 
         switch (catFact.getStatusCode().value()) {
             case 200 -> {
