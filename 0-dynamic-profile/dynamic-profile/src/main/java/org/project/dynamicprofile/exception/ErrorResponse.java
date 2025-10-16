@@ -1,17 +1,17 @@
 package org.project.dynamicprofile.exception;
 
-import java.time.LocalDateTime;
-
 import org.springframework.http.HttpStatus;
+
+import java.time.Instant;
 
 public record ErrorResponse(
     int httpStatus,
     String error,
     String message,
     String path,
-    LocalDateTime timestamp
+    Instant timestamp
 ) {
-     public ErrorResponse(int httpStatus, String error, String message, String path, LocalDateTime timestamp) {
+     public ErrorResponse(int httpStatus, String error, String message, String path, Instant timestamp) {
         this.httpStatus = httpStatus;
         this.error = error;
         this.message = message;
@@ -19,7 +19,7 @@ public record ErrorResponse(
         this.timestamp = timestamp;
     }
 
-    public ErrorResponse(HttpStatus httpStatus, String message, String path, LocalDateTime timestamp) {
+    public ErrorResponse(HttpStatus httpStatus, String message, String path, Instant timestamp) {
         this(httpStatus.value(), httpStatus.getReasonPhrase(), message, path, timestamp);
     }
 }

@@ -1,14 +1,9 @@
 package org.project.dynamicprofile.service;
 
-import java.time.LocalDateTime;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.project.dynamicprofile.dto.response.CatFact;
 import org.project.dynamicprofile.dto.response.MainResponse;
@@ -16,6 +11,12 @@ import org.project.dynamicprofile.dto.response.Me;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
+
+import java.time.Instant;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class MainServiceTest {
@@ -73,7 +74,7 @@ class MainServiceTest {
             MainResponse.builder()
                 .status("success")
                 .user(new Me(email, name, stack))
-                .timestamp(LocalDateTime.now().toString())
+                .timestamp(Instant.now().toString())
                 .fact(thirdPartyResponse.getBody().fact())
             .build()
         );
@@ -103,7 +104,7 @@ class MainServiceTest {
             MainResponse.builder()
                 .status("success")
                 .user(new Me(email, name, stack))
-                .timestamp(LocalDateTime.now().toString())
+                .timestamp(Instant.now().toString())
                 .fact("Nothing to display!")
             .build()
         );

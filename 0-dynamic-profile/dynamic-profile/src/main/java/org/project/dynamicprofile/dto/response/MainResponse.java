@@ -1,6 +1,6 @@
 package org.project.dynamicprofile.dto.response;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import lombok.Builder;
 
@@ -15,7 +15,7 @@ public record MainResponse(
         return MainResponse.builder()
                 .status("success")
                 .user(me)
-                .timestamp(LocalDateTime.now().toString())
+                .timestamp(Instant.now().toString())
                 .fact(catFact.length() != 0 ? catFact.fact() : "Nothing to display!")
             .build();
     }
