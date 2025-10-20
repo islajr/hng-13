@@ -79,7 +79,14 @@ public class StringService {
     }
 
     public ResponseEntity<?> deleteString(String stringValue) {
-        return null;
+        if (!strings.containsKey(stringValue)) {
+            log.error("[Delete String] Error: String: {} does not exist", stringValue);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        strings.remove(stringValue);
+        log.info("[Delete String] Deleted string: {}", stringValue);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     private StringProperties getStringProperties(String str) {
