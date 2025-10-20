@@ -26,12 +26,6 @@ public class StringService {
     Map<String, StringAnalyzerResponse> strings = new ConcurrentHashMap<>();
 
     public ResponseEntity<StringAnalyzerResponse> analyzeString(StringAnalyzerRequest request) {
-        /*
-        * install and import caffeine for caching or use hashmap
-        * util methods to check: is_palindrome, word_count, unique characters, sha256_hash, and character_frequency map
-        * generate and cache result, using string value as key
-        *
-        * */
 
         if (request.value() == null || request.value().isEmpty() || request.value().equals(" ")) {
             log.error("[Analyze String] Error: Value does not exist");
@@ -61,6 +55,10 @@ public class StringService {
 
     public ResponseEntity<StringAnalyzerResponse> getString(String stringValue) {
 
+        if (stringValue == null || stringValue.isEmpty()) {
+            log.error("[Get String] Error: Value does not exist");
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
         log.info("[Get String] Querying cache for string: {}", stringValue);
         StringAnalyzerResponse response = strings.get(stringValue);
 
