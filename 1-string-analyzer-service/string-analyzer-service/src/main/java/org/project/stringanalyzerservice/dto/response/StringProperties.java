@@ -11,6 +11,6 @@ public record StringProperties(
         int unique_characters,
         int word_count,
         String sha256_hash,
-        Map<String, Integer> character_frequency_map
+        Map<Character, Integer> character_frequency_map
 ) {
 }
