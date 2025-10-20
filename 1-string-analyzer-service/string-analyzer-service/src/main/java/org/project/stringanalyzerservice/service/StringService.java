@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -70,8 +72,29 @@ public class StringService {
         return ResponseEntity.ok(response);
     }
 
-    public ResponseEntity<FilteredStringResponse> getFilteredStrings(String isPalindrome, String minLength, String maxLength, String wordCount, String containsCharacter) {
-        return null;
+    public ResponseEntity<FilteredStringResponse> getFilteredStrings(Boolean isPalindrome, Integer minLength, Integer maxLength, Integer wordCount, Character containsCharacter) {
+
+        List<StringAnalyzerResponse> filteredData = strings.values().stream()
+                .filter(stringAnalyzerResponse -> isPalindrome == null || stringAnalyzerResponse.properties().is_palindrome() == isPalindrome)
+                .filter(stringAnalyzerResponse -> minLength == null || stringAnalyzerResponse.properties().length() >= minLength)
+                .filter(stringAnalyzerResponse -> maxLength == null || stringAnalyzerResponse.properties().length() <= maxLength)
+                .filter(stringAnalyzerResponse -> wordCount == null || stringAnalyzerResponse.properties().word_count() == wordCount)
+                .filter(stringAnalyzerResponse -> containsCharacter == null || stringAnalyzerResponse.value().contains(Character.toString(containsCharacter)))
+                .toList();
+
+        if (filteredData.isEmpty()) {
+            log.error("[Filter Strings] Error: No data found");
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        return ResponseEntity.ok(
+                FilteredStringResponse.builder()
+                        .data(filteredData)
+                        .count(filteredData.size())
+                        .filtersApplied(getFilters(isPalindrome, minLength, maxLength, wordCount, containsCharacter))
+                        .build()
+        );
+
     }
 
     public ResponseEntity<NLPStringResponse> getNLPString(String query) {
@@ -99,5 +122,27 @@ public class StringService {
                 .unique_characters(util.distinct_character_count(str))
                 .word_count(util.word_count(str))
                 .build();
+    }
+
+    private List<String> getFilters(Boolean isPalindrome, Integer minLength, Integer maxLength, Integer wordCount, Character containsCharacter) {
+        List<String> filters = new ArrayList<>();
+
+        if (isPalindrome != null) {
+            filters.add("is_palindrome");
+        }
+        if (minLength != null) {
+            filters.add("min_length");
+        }
+        if (maxLength != null) {
+            filters.add("max_length");
+        }
+        if (wordCount != null) {
+            filters.add("word_count");
+        }
+        if (containsCharacter != null) {
+            filters.add("contains_character");
+        }
+
+        return filters;
     }
 }

@@ -27,11 +27,11 @@ public class StringController {
 
     @GetMapping("/strings")
     public ResponseEntity<FilteredStringResponse> getFilteredStrings(
-            @RequestParam(defaultValue = "false", required = false) String is_palindrome,
-            @RequestParam(defaultValue = "false", required = false) String min_length,
-            @RequestParam(defaultValue = "false", required = false) String max_length,
-            @RequestParam(defaultValue = "false", required = false) String word_count,
-            @RequestParam(defaultValue = "false", required = false) String contains_character
+            @RequestParam(required = false) Boolean is_palindrome,
+            @RequestParam(required = false) Integer min_length,
+            @RequestParam(required = false) Integer max_length,
+            @RequestParam(required = false) Integer word_count,
+            @RequestParam(required = false) Character contains_character
     ) {
         return stringService.getFilteredStrings(is_palindrome, min_length, max_length, word_count, contains_character);
     }

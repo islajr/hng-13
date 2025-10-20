@@ -8,6 +8,7 @@ import java.util.List;
 public record FilteredStringResponse(
         List<StringAnalyzerResponse> data,
         int count,
-        FiltersApplied filtersApplied
+//        FiltersApplied filtersApplied
+        List<String> filtersApplied
 ) {
 }
