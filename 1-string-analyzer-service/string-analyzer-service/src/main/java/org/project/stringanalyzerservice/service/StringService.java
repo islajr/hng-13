@@ -3,10 +3,9 @@ package org.project.stringanalyzerservice.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.project.stringanalyzerservice.dto.request.StringAnalyzerRequest;
-import org.project.stringanalyzerservice.dto.response.FilteredStringResponse;
-import org.project.stringanalyzerservice.dto.response.NLPStringResponse;
-import org.project.stringanalyzerservice.dto.response.StringAnalyzerResponse;
-import org.project.stringanalyzerservice.dto.response.StringProperties;
+import org.project.stringanalyzerservice.dto.response.*;
+import org.project.stringanalyzerservice.util.FilterResult;
+import org.project.stringanalyzerservice.util.NaturalLanguageFilter;
 import org.project.stringanalyzerservice.util.StringUtilities;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class StringService {
 
     private final StringUtilities util;
+    private final NaturalLanguageFilter filter;
 
     Map<String, StringAnalyzerResponse> strings = new ConcurrentHashMap<>();
 
@@ -98,7 +98,37 @@ public class StringService {
     }
 
     public ResponseEntity<NLPStringResponse> getNLPString(String query) {
-        return null;
+
+        if (query == null || query.isEmpty()) {
+            log.error("[Get NLP String] Error: Value does not exist");
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        log.info("[Get NLP String] Parsing query: {}", query);
+        FilterResult result = filter.parse(query);
+
+        List<String> filteredLiterals = strings.values().stream()
+                .map(StringAnalyzerResponse::value)
+                .filter(result.predicate())
+                .toList();
+
+        List<StringAnalyzerResponse> filteredData = new ArrayList<>();
+        for (StringAnalyzerResponse response : strings.values()) {
+            if (filteredLiterals.contains(response.value())) {
+                filteredData.add(response);
+            }
+        }
+
+        return ResponseEntity.ok(
+                NLPStringResponse.builder()
+                        .data(filteredData)
+                        .count(filteredData.size())
+                        .interpreted_query(InterpretedQuery.builder()
+                                .original(query)
+                                .parsed_filters(result.appliedFilters())
+                                .build())
+                        .build()
+        );
     }
 
     public ResponseEntity<?> deleteString(String stringValue) {

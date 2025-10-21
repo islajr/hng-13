@@ -38,7 +38,7 @@ public class StringController {
 
     @GetMapping("/strings/filter-by-natural-language")
     public ResponseEntity<NLPStringResponse> getNLPString(
-            @RequestParam(defaultValue = "", required = true) String query
+            @RequestParam String query
     ) {
         return stringService.getNLPString(query);
     }
