@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -154,23 +155,23 @@ public class StringService {
                 .build();
     }
 
-    private List<String> getFilters(Boolean isPalindrome, Integer minLength, Integer maxLength, Integer wordCount, Character containsCharacter) {
-        List<String> filters = new ArrayList<>();
+    private Map<String, String> getFilters(Boolean isPalindrome, Integer minLength, Integer maxLength, Integer wordCount, Character containsCharacter) {
+        Map<String, String> filters = new HashMap<>();
 
         if (isPalindrome != null) {
-            filters.add("is_palindrome");
+            filters.put("is_palindrome", String.valueOf(isPalindrome));
         }
         if (minLength != null) {
-            filters.add("min_length");
+            filters.put("min_length", String.valueOf(minLength));
         }
         if (maxLength != null) {
-            filters.add("max_length");
+            filters.put("max_length", String.valueOf(maxLength));
         }
         if (wordCount != null) {
-            filters.add("word_count");
+            filters.put("word_count", String.valueOf(wordCount));
         }
         if (containsCharacter != null) {
-            filters.add("contains_character");
+            filters.put("contains_character", String.valueOf(containsCharacter));
         }
 
         return filters;
