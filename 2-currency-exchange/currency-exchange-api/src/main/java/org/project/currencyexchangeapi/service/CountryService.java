@@ -3,9 +3,12 @@ package org.project.currencyexchangeapi.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.project.currencyexchangeapi.dto.response.GetCountryResponse;
+import org.project.currencyexchangeapi.dto.response.StatusResponse;
 import org.project.currencyexchangeapi.dto.response.thirdparty.country.CountryAPIResponse;
 import org.project.currencyexchangeapi.dto.response.thirdparty.exchange.USDRatesResponse;
 import org.project.currencyexchangeapi.entity.Country;
+import org.project.currencyexchangeapi.exception.exceptions.CountryNotFoundException;
 import org.project.currencyexchangeapi.repository.CountryRepository;
 import org.project.currencyexchangeapi.util.CountryUtil;
 import org.springframework.beans.factory.annotation.Value;
@@ -89,20 +92,42 @@ public class CountryService {
         return null;
     }
 
-    public ResponseEntity<?> getCountries() {
+    public ResponseEntity<List<GetCountryResponse>> getCountries() {
         return null;
     }
 
-    public ResponseEntity<?> getCountry(String name) {
-        return null;
+    public ResponseEntity<GetCountryResponse> getCountry(String name) {
+
+        log.info("[Get Country] Querying for country: {}", name);
+        Country country = countryRepository.findCountryByName(name).orElseThrow(
+                () -> new CountryNotFoundException("Country not found"));
+
+        log.info("[Get Country] Retrieving data for country: {}", country.getName());
+        return ResponseEntity.ok(GetCountryResponse.generateResponse(country));
+
     }
 
     public ResponseEntity<?> deleteCountry(String name) {
-        return null;
+
+        log.info("[Delete Country] Querying for country: {}", name);
+        Country country = countryRepository.findCountryByName(name).orElseThrow(
+                () -> new CountryNotFoundException("Country not found"));
+
+        log.info("[Delete Country] Deleting data for country: {}", country.getName());
+        countryRepository.deleteCountryByName(name);
+
+        log.info("[Delete Country] Successfully deleted data for country: {}", country.getName());
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    public ResponseEntity<?> getStatus() {
-        return null;
+    public ResponseEntity<StatusResponse> getStatus() {
+        long count = countryRepository.count();
+        String lastRefreshed = countryRepository.findCountryByLastRefreshed_max().getLastRefreshed().toString();
+
+        return ResponseEntity.ok(StatusResponse.builder()
+                        .total_countries(count)
+                        .last_refreshed_at(lastRefreshed)
+                .build());
     }
 
     public ResponseEntity<?> getImage() {

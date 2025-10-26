@@ -1,9 +1,14 @@
 package org.project.currencyexchangeapi.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.project.currencyexchangeapi.dto.response.GetCountryResponse;
+import org.project.currencyexchangeapi.dto.response.StatusResponse;
+import org.project.currencyexchangeapi.dto.response.thirdparty.country.CountryResponse;
 import org.project.currencyexchangeapi.service.CountryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -17,12 +22,12 @@ public class CountryController {
     }
 
     @GetMapping("/countries")
-    public ResponseEntity<?> getCountries() {
+    public ResponseEntity<List<GetCountryResponse>> getCountries() {
         return countryService.getCountries();
     }
 
     @GetMapping("/countries/{name}")
-    public ResponseEntity<?> getCountry(@PathVariable String name) {
+    public ResponseEntity<GetCountryResponse> getCountry(@PathVariable String name) {
         return countryService.getCountry(name);
     }
 
@@ -32,7 +37,7 @@ public class CountryController {
     }
 
     @GetMapping("/status")
-    public ResponseEntity<?> getStatus() {
+    public ResponseEntity<StatusResponse> getStatus() {
         return countryService.getStatus();
     }
 
