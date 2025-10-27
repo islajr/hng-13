@@ -75,6 +75,10 @@ public class CountryUtil {
 
         log.info("[Refresh Countries] Sorting currencies");
 
+        if (currencies == null) {
+            return null;
+        }
+
         if (currencies.size() > 1) {
             log.info("[Refresh Countries] Found multiple currencies in response. Proceeding with first one");
             return currencies.getFirst().get("code");
