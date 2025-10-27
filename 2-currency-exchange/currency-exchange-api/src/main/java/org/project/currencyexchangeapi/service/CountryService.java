@@ -5,13 +5,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.project.currencyexchangeapi.dto.response.GetCountryResponse;
 import org.project.currencyexchangeapi.dto.response.StatusResponse;
-import org.project.currencyexchangeapi.dto.response.thirdparty.country.CountryAPIResponse;
+import org.project.currencyexchangeapi.dto.response.thirdparty.country.CountryResponse;
 import org.project.currencyexchangeapi.dto.response.thirdparty.exchange.USDRatesResponse;
 import org.project.currencyexchangeapi.entity.Country;
 import org.project.currencyexchangeapi.exception.exceptions.CountryNotFoundException;
 import org.project.currencyexchangeapi.repository.CountryRepository;
 import org.project.currencyexchangeapi.util.CountryUtil;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -38,7 +40,9 @@ public class CountryService {
     public ResponseEntity<?> refreshCountries() {
 
         log.info("[Refresh Countries] Querying third-party APIs for relevant data");
-        ResponseEntity<CountryAPIResponse> countryAPIResponse = restTemplate.getForEntity(countryApiURL, CountryAPIResponse.class);
+        ResponseEntity<List<CountryResponse>> countryAPIResponse = restTemplate.exchange(
+                countryApiURL, HttpMethod.GET, null, new ParameterizedTypeReference<>() {
+                });
         ResponseEntity<USDRatesResponse> USDRatesResponse = restTemplate.getForEntity(currencyExchangeApiURL, USDRatesResponse.class);
 
         log.info("[Refresh Countries] Checking for existing data");

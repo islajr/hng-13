@@ -2,7 +2,6 @@ package org.project.currencyexchangeapi.util;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.project.currencyexchangeapi.dto.response.thirdparty.country.CountryAPIResponse;
 import org.project.currencyexchangeapi.dto.response.thirdparty.country.CountryResponse;
 import org.project.currencyexchangeapi.dto.response.thirdparty.exchange.USDRatesResponse;
 import org.project.currencyexchangeapi.entity.Country;
@@ -19,7 +18,7 @@ import java.util.Map;
 public class CountryUtil {
 
 
-    public List<Country> matchCurrencies(ResponseEntity<CountryAPIResponse> countryAPIResponse, ResponseEntity<USDRatesResponse> USDRatesResponse) {
+    public List<Country> matchCurrencies(ResponseEntity<List<CountryResponse>> countryAPIResponse, ResponseEntity<USDRatesResponse> USDRatesResponse) {
 
         log.info("[Refresh Countries] Matching countries and USD rates");
         assert countryAPIResponse.getBody() != null;
@@ -27,9 +26,9 @@ public class CountryUtil {
 
         List<Country> countries = new ArrayList<>();
 
-        for (CountryResponse response : countryAPIResponse.getBody().countryResponses()) {
+        for (CountryResponse response : countryAPIResponse.getBody()) {
 
-            Country country = CountryAPIResponse.generateCountry(response);
+            Country country = CountryResponse.generateCountry(response);
 
             if (country.getCurrencyCode() != null) {
                 Double rate =  USDRatesResponse.getBody().rates().get(country.getCurrencyCode());
