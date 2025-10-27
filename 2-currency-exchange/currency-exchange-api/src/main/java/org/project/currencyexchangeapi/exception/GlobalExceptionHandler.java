@@ -37,6 +37,13 @@ public class GlobalExceptionHandler {
                 .body(handleException("No resource found"));
     }
 
+    @ExceptionHandler(value = IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
+        log.error(ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(handleException(ex.getMessage()));
+    }
+
     // 500 -- Assertion Error
     @ExceptionHandler(value = AssertionError.class)
     public ResponseEntity<ErrorResponse> handleAssertionError(AssertionError er) {
