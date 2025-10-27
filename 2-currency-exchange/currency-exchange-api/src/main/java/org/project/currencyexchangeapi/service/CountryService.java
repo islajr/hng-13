@@ -15,6 +15,7 @@ import org.project.currencyexchangeapi.repository.CountryRepository;
 import org.project.currencyexchangeapi.util.CountryUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +23,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -120,8 +123,39 @@ public class CountryService {
         return null;
     }
 
-    public ResponseEntity<List<GetCountryResponse>> getCountries() {
-        return null;
+    public ResponseEntity<List<GetCountryResponse>> getCountries(String region, String currency, String sort) {
+
+        List<GetCountryResponse> responseList = new ArrayList<>();
+
+        Sort toSort = Sort.by(sort.equals("gdp_asc") ? Sort.Direction.ASC : Sort.Direction.DESC, "estimatedGDP");
+
+        if (!Objects.equals(region, "all") && !Objects.equals(currency, "all")) {   // return all filtered values in sorted order
+            log.info("[Get Countries] Querying db for filtered region - {}, currency - {}", region, currency);
+            countryRepository.findAllByRegionAndCurrencyCode(region, currency, toSort).forEach(country -> {
+                responseList.add(GetCountryResponse.generateResponse(country));
+            });
+        } else if (!Objects.equals(region, "all")) {    // only filter by region and sort
+            log.info("[Get Countries] Querying db for filtered region - {}", region);
+            countryRepository.findAllByRegion(region, toSort).forEach(country -> {
+                responseList.add(GetCountryResponse.generateResponse(country));
+            });
+        } else if (!Objects.equals(currency, "all")) { // only filter by currency and sort
+            log.info("[Get Countries] Querying db for filtered currency - {}", currency);
+            countryRepository.findAllByCurrencyCode(currency, toSort).forEach(country -> {
+                responseList.add(GetCountryResponse.generateResponse(country));
+            });
+        } else {    // do not filter, return all values in sorted order
+            log.info("[Get Countries] Querying db for all regions and currencies");
+            countryRepository.findAll(toSort).forEach(country -> {
+                responseList.add(GetCountryResponse.generateResponse(country));
+            });
+        }
+
+        if (responseList.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(responseList, HttpStatus.OK);
     }
 
     public ResponseEntity<GetCountryResponse> getCountry(String name) {

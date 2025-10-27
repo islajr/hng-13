@@ -21,8 +21,12 @@ public class CountryController {
     }
 
     @GetMapping("/countries")
-    public ResponseEntity<List<GetCountryResponse>> getCountries() {
-        return countryService.getCountries();
+    public ResponseEntity<List<GetCountryResponse>> getCountries(
+            @RequestParam(required = false, defaultValue = "all") String region,
+            @RequestParam(required = false, defaultValue = "all") String currency,
+            @RequestParam(required = false, defaultValue = "gdp_asc") String sort
+    ) {
+        return countryService.getCountries(region, currency, sort);
     }
 
     @GetMapping("/countries/{name}")
