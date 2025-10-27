@@ -15,6 +15,4 @@ public interface CountryRepository extends JpaRepository<Country, Long> {
 
     void deleteCountryByName(String name);
 
-
-    Country findCountryByLastRefreshed_max();
 }

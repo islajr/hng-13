@@ -1,5 +1,7 @@
 package org.project.currencyexchangeapi.service;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.Duration;
 import java.util.List;
 
 @Service
@@ -36,6 +39,10 @@ public class CountryService {
     @Value("${currency.api.url}")
     private String currencyExchangeApiURL;
 
+    private final Cache<String, String> statusCache = Caffeine.newBuilder()
+            .expireAfterWrite(Duration.ofHours(24))
+            .build();
+
     @Transactional
     public ResponseEntity<?> refreshCountries() {
 
@@ -44,6 +51,15 @@ public class CountryService {
                 countryApiURL, HttpMethod.GET, null, new ParameterizedTypeReference<>() {
                 });
         ResponseEntity<USDRatesResponse> USDRatesResponse = restTemplate.getForEntity(currencyExchangeApiURL, USDRatesResponse.class);
+
+        if (countryAPIResponse.getStatusCode() != HttpStatus.OK || USDRatesResponse.getStatusCode() != HttpStatus.OK) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("""
+                    {
+                        "error": "External data source unavailable",
+                        "details": "Could not fetch data from [API Name]"
+                    }
+                    """);
+        }
 
         log.info("[Refresh Countries] Checking for existing data");
         if (countryRepository.existsByCurrencyCode("USD")) {
@@ -67,6 +83,9 @@ public class CountryService {
                 log.info("[Refresh Countries] Saving data to DB");
                 countryRepository.save(country);
 
+                log.info("[Refresh Countries] Updating status cache");
+                updateCache(country);
+
                 return new ResponseEntity<>(HttpStatus.OK);
             }
 
@@ -88,6 +107,9 @@ public class CountryService {
 
             log.info("[Refresh Countries] Persisting new data");
             countryRepository.saveAll(countryList);
+
+            log.info("[Refresh Countries] Update status cache");
+            updateCache(countryList.getLast());
 
             return new ResponseEntity<>(HttpStatus.CREATED);
         }
@@ -125,16 +147,29 @@ public class CountryService {
     }
 
     public ResponseEntity<StatusResponse> getStatus() {
-        long count = countryRepository.count();
-        String lastRefreshed = countryRepository.findCountryByLastRefreshed_max().getLastRefreshed().toString();
+        Long count = Long.parseLong(statusCache.getIfPresent("count"));
+        String lastRefreshed = statusCache.getIfPresent("last_updated");
+
+
+        if (lastRefreshed != null && count != null) {
+            return ResponseEntity.ok(StatusResponse.builder()
+                            .total_countries(count)
+                            .last_refreshed_at(lastRefreshed)
+                    .build());
+        }
 
         return ResponseEntity.ok(StatusResponse.builder()
-                        .total_countries(count)
-                        .last_refreshed_at(lastRefreshed)
+                        .total_countries(0L)
+                        .last_refreshed_at("")
                 .build());
     }
 
     public ResponseEntity<?> getImage() {
         return null;
+    }
+
+    void updateCache(Country country) {
+        statusCache.put("count", "250");
+        statusCache.put("last_updated", country.getLastRefreshed().toString());
     }
 }
