@@ -53,7 +53,9 @@ public class CountryService {
         ResponseEntity<USDRatesResponse> USDRatesResponse = restTemplate.getForEntity(currencyExchangeApiURL, USDRatesResponse.class);
 
         if (countryAPIResponse.getStatusCode() != HttpStatus.OK || USDRatesResponse.getStatusCode() != HttpStatus.OK) {
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("""
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .header("Content-Type", "application/json")
+                    .body("""
                     {
                         "error": "External data source unavailable",
                         "details": "Could not fetch data from [API Name]"
@@ -165,7 +167,13 @@ public class CountryService {
     }
 
     public ResponseEntity<?> getImage() {
-        return null;
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .header("Content-Type", "application/json")
+                .body("""
+                {
+                    "error": "Summary image not found"
+                }
+                """);
     }
 
     void updateCache(Country country) {
