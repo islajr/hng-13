@@ -10,4 +10,6 @@ This repository holds all my projects for the HNG-13 internship cohort.
 
 [2 - Currency Exchange](https://github.com/islajr/hng-13/tree/master/2-currency-exchange)
 
+[3 - AI Agent Integration](https://github.com/islajr/hng-13/tree/master/3-strimr-ai)
+
 *Code contained in this repository is not to be plagiarized in any form*
